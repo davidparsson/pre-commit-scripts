@@ -3,7 +3,7 @@ import sys
 import subprocess
 import re
 
-MIGRATION_PATTERN = "^(.*/db/migrations/)[0-9+].*\.rb$"
+migration_matcher = re.compile("^(.*/db/migrations/)[0-9+].*\.rb$")
 
 def check_filenames(look_command):
   error = 0
@@ -24,7 +24,7 @@ def get_migration_dir(filename):
   return get_migration_match(filename).group(1)
 
 def get_migration_match(filename):
-  return re.match(MIGRATION_PATTERN, filename)
+  return migration_matcher.match(filename)
 
 def get_files_added_in_commit(look_command):
   def added(line):
