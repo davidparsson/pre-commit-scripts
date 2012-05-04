@@ -1,0 +1,64 @@
+#!/usr/bin/python
+import re
+
+migration_matcher = re.compile("^(.*/db/migrations/)[0-9+].*\.rb$")
+
+def check_filenames(look_command):
+  error = 0
+  added_filenames = files_added(look_command)
+  migration_files = []
+  for filename in added_filenames:
+    match = migration_matcher.match(filename)
+    if match:
+      path = match.group(1)
+      existing_files = [f for f in get_existing_files_in(path, look_command) if migration_matcher.match(f)]
+      for existing_file in existing_files:
+        if filename < existing_file and existing_file not in added_filenames:
+          sys.stderr.write("Error: The added file %s must have a filename alphabetically after %s\n" % (filename, existing_file))
+          error += 1
+          break
+  return error
+
+def get_existing_files_in(path, look_command):
+  return command_output("%s %s" % (look_command % "tree --full-paths", path))
+
+def files_added(look_command):
+  def added(line):
+    return line and line[0] == "A"
+  def filename(line):
+    return line[4:]
+    
+  return [filename(line) for line in get_changed(look_command) if added(line)]
+  
+def get_changed(look_command):
+  return command_output(look_command % "changed")
+
+def command_output(cmd):
+  "Captures a command's standard output."
+  import subprocess
+  return subprocess.Popen(cmd.split(), stdout=subprocess.PIPE).communicate()[0].split("\n")
+
+def main():
+  usage = """Usage: %prog REPO TXN
+
+Run pre-commit verification on a repository transaction."""
+  from optparse import OptionParser
+  parser = OptionParser(usage=usage)
+  parser.add_option("-r", "--revision",
+                    help="Test mode. Specify a revision instead of a transaction.",
+                    action="store_true", default=False)
+
+  errors = 0
+  try:
+    (options, (repos, transaction_or_revision)) = parser.parse_args()
+    look_option = ("--transaction", "--revision")[options.revision]
+    look_command = "svnlook %s %s %s %s" % ("%s", repos, look_option, transaction_or_revision)
+    errors += check_filenames(look_command)
+  except:
+    parser.print_help()
+    errors += 1
+  return errors
+
+if __name__ == "__main__":
+  import sys
+  sys.exit(main())
