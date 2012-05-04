@@ -1,33 +1,46 @@
 #!/usr/bin/python
 
 def check_filenames(look_command):
-  import re
-  migration_matcher = re.compile("^(.*/db/migrations/)[0-9+].*\.rb$")
-
   error = 0
-  added_filenames = files_added(look_command)
-  migration_files = []
+  added_filenames = get_files_added_in_commit(look_command)
   for filename in added_filenames:
-    match = migration_matcher.match(filename)
-    if match:
-      path = match.group(1)
-      existing_files = [f for f in get_existing_files_in(path, look_command) if migration_matcher.match(f)]
-      for existing_file in existing_files:
-        if filename < existing_file and existing_file not in added_filenames:
-          sys.stderr.write("Error: The added file %s must have a filename alphabetically after %s\n" % (filename, existing_file))
-          error += 1
-          break
+    if is_migration_file(filename):
+      last_existing_file = get_last_existing_file_after(filename, added_filenames, look_command)
+      if last_existing_file:
+        sys.stderr.write("Error: The added file %s must have a filename \
+alphabetically after the existing %s\n" % (filename, last_existing_file))
+        error += 1
+        break
   return error
 
-def files_added(look_command):
+def is_migration_file(filename):
+  return bool(get_migration_match(filename))
+
+def get_migration_dir(filename):
+  return get_migration_match(filename).group(1)
+
+def get_migration_match(filename):
+  import re
+  return re.match("^(.*/db/migrations/)[0-9+].*\.rb$", filename)
+
+def get_files_added_in_commit(look_command):
   def added(line):
     return line and line[0] == "A"
   def filename(line):
     return line[4:]
   return [filename(line) for line in get_changed_files(look_command) if added(line)]
 
-def get_existing_files_in(path, look_command):
-  return command_output("%s %s" % (look_command % "tree --full-paths", path))
+def get_last_existing_file_after(filename, added_filenames, look_command):
+  existing_files = get_existing_files_in(get_migration_dir(filename), added_filenames, look_command)
+  existing_migrations = [f for f in existing_files if is_migration_file(f)]
+  existing_migrations.sort()
+  if filename < existing_migrations[-1]:
+    return existing_migrations[-1]
+  return None
+
+def get_existing_files_in(path, added_filenames, look_command):
+  all_files = command_output("%s %s" % (look_command % "tree --full-paths", path))
+  return [filename for filename in all_files if filename not in added_filenames]
   
 def get_changed_files(look_command):
   return command_output(look_command % "changed")
@@ -53,6 +66,7 @@ Run pre-commit verification on a repository transaction."""
     look_command = "svnlook %s %s %s %s" % ("%s", repos, look_option, transaction_or_revision)
     return check_filenames(look_command)
   except:
+
     parser.print_help()
     return 1
 
