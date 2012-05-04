@@ -1,9 +1,9 @@
 #!/usr/bin/python
-import re
-
-migration_matcher = re.compile("^(.*/db/migrations/)[0-9+].*\.rb$")
 
 def check_filenames(look_command):
+  import re
+  migration_matcher = re.compile("^(.*/db/migrations/)[0-9+].*\.rb$")
+
   error = 0
   added_filenames = files_added(look_command)
   migration_files = []
@@ -48,16 +48,14 @@ Run pre-commit verification on a repository transaction."""
                     help="Test mode. Specify a revision instead of a transaction.",
                     action="store_true", default=False)
 
-  errors = 0
   try:
     (options, (repos, transaction_or_revision)) = parser.parse_args()
     look_option = ("--transaction", "--revision")[options.revision]
     look_command = "svnlook %s %s %s %s" % ("%s", repos, look_option, transaction_or_revision)
-    errors += check_filenames(look_command)
+    return check_filenames(look_command)
   except:
     parser.print_help()
-    errors += 1
-  return errors
+    return 1
 
 if __name__ == "__main__":
   import sys
