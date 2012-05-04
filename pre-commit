@@ -3,12 +3,12 @@
 def check_filenames(look_command):
   error = 0
   added_filenames = get_files_added_in_commit(look_command)
-  for filename in added_filenames:
-    if is_migration_file(filename):
-      last_existing_file = get_last_existing_file_after(filename, added_filenames, look_command)
+  for added_filename in added_filenames:
+    if is_migration_file(added_filename):
+      last_existing_file = get_last_existing_file_after(added_filename, added_filenames, look_command)
       if last_existing_file:
         sys.stderr.write("Error: The added file %s must have a filename \
-alphabetically after the existing %s\n" % (filename, last_existing_file))
+alphabetically after the existing %s\n" % (added_filename, last_existing_file))
         error += 1
   return error
 
