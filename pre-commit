@@ -19,18 +19,17 @@ def check_filenames(look_command):
           break
   return error
 
-def get_existing_files_in(path, look_command):
-  return command_output("%s %s" % (look_command % "tree --full-paths", path))
-
 def files_added(look_command):
   def added(line):
     return line and line[0] == "A"
   def filename(line):
     return line[4:]
-    
-  return [filename(line) for line in get_changed(look_command) if added(line)]
+  return [filename(line) for line in get_changed_files(look_command) if added(line)]
+
+def get_existing_files_in(path, look_command):
+  return command_output("%s %s" % (look_command % "tree --full-paths", path))
   
-def get_changed(look_command):
+def get_changed_files(look_command):
   return command_output(look_command % "changed")
 
 def command_output(cmd):
