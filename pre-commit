@@ -10,7 +10,6 @@ def check_filenames(look_command):
         sys.stderr.write("Error: The added file %s must have a filename \
 alphabetically after the existing %s\n" % (filename, last_existing_file))
         error += 1
-        break
   return error
 
 def is_migration_file(filename):
