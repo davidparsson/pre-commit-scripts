@@ -7,7 +7,7 @@ FILE_PATTERN = "^.*/db/migrations/[0-9+].*\.rb$"
 SKIP_KEYWORD = "skip-migration-check"
 
 def check_filenames(look_command):
-  if should_ignore_commit(look_command):
+  if should_skip_check_for_commit(look_command):
     return 0
   error = 0
   added_filenames = get_files_added_in_commit(look_command)
@@ -22,7 +22,7 @@ alphabetically after the existing %s\n" % (added_filename, last_existing_file))
     output_ignore_message()
   return error
 
-def should_ignore_commit(look_command):
+def should_skip_check_for_commit(look_command):
   return SKIP_KEYWORD in " ".join(get_commit_message(look_command)).split(" ")
 
 def output_ignore_message():
