@@ -5,6 +5,7 @@ import re
 
 FILE_PATTERN = "^.*/db/migrations/[0-9+].*\.rb$"
 SKIP_KEYWORD = "skip-migration-check"
+SVNLOOK = "svnlook"
 
 def check_filenames(look_command):
   if should_skip_check_for_commit(look_command):
@@ -76,7 +77,7 @@ Run pre-commit verification on a repository transaction."""
   try:
     (options, (repos, transaction_or_revision)) = parser.parse_args()
     look_option = ("--transaction", "--revision")[options.revision]
-    look_command = "svnlook %s %s %s %s" % ("%s", repos, look_option, transaction_or_revision)
+    look_command = "%s %s %s %s %s" % (SVNLOOK, "%s", repos, look_option, transaction_or_revision)
     return check_filenames(look_command)
   except:
     parser.print_help()
