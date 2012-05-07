@@ -3,7 +3,7 @@ import sys
 import subprocess
 import re
 
-migration_matcher = re.compile("^.*/db/migrations/[0-9+].*\.rb$")
+FILE_PATTERN = "^.*/db/migrations/[0-9+].*\.rb$"
 SKIP_KEYWORD = "skip-migration-check"
 
 def check_filenames(look_command):
@@ -29,7 +29,7 @@ def output_ignore_message():
   sys.stderr.write("If you want to commit this anyway, include \"%s\" in the commit message.\n" % SKIP_KEYWORD)
 
 def is_migration_file(filename):
-  return bool(migration_matcher.match(filename))
+  return bool(re.match(FILE_PATTERN, filename))
 
 def get_migration_dir(filename):
   return filename[0:filename.rfind("/") + 1]
