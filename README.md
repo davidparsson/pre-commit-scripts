@@ -10,6 +10,10 @@ executed alphabetically.
 Usage
 -----
 
+For an example of how to run the script in a hook, see `pre-commit`.
+
+For script usage, see below:
+
 <pre>
 Usage: ordered-filename-pre-commit.py REPOS TXN FILE_PATTERN SKIP_KEYWORD
 
@@ -19,5 +23,3 @@ Options:
   -h, --help      show this help message and exit
   -r, --revision  Test mode. Specify a revision instead of a transaction.
 </pre>
-
-For an example of how to run the script in a hook, see `pre-commit`.
