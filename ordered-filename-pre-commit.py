@@ -72,10 +72,10 @@ Run pre-commit verification on a repository transaction."""
                     help="Test mode. Specify a revision instead of a transaction.",
                     action="store_true", default=False)
 
-  (options, (repos, transaction_or_revision, file_pattern, skip_keyword)) = parser.parse_args()
-  look_option = ("--transaction", "--revision")[options.revision]
-  look_command = "%s %s %s %s %s" % (SVNLOOK_COMMAND, "%s", repos, look_option, transaction_or_revision)
   try:
+    (options, (repos, transaction_or_revision, file_pattern, skip_keyword)) = parser.parse_args()
+    look_option = ("--transaction", "--revision")[options.revision]
+    look_command = "%s %s %s %s %s" % (SVNLOOK_COMMAND, "%s", repos, look_option, transaction_or_revision)
     return check_filenames(file_pattern, skip_keyword, look_command)
   except:
     parser.print_help()
