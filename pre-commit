@@ -15,8 +15,8 @@ def check_filenames(look_command):
     if is_migration_file(added_filename):
       last_existing_file = get_last_existing_file_after(added_filename, added_filenames, look_command)
       if last_existing_file:
-        sys.stderr.write("Error: The added file %s must have a filename \
-alphabetically after the existing %s\n" % (added_filename, last_existing_file))
+        sys.stderr.write("Error: The added file \"%s\" must have a filename \
+alphabetically after the existing \"%s\".\n" % (added_filename, last_existing_file))
         error += 1
   if error > 0:
     output_ignore_message()
