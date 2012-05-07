@@ -50,7 +50,7 @@ def get_last_existing_file_after(filename, added_filenames, file_pattern, look_c
   return None
 
 def get_existing_files_in(path, added_filenames, look_command):
-  all_files = command_output("%s %s" % (look_command % "tree --full-paths", path))
+  all_files = command_output("%s %s" % (look_command % "tree --full-paths --non-recursive", path))
   return [filename for filename in all_files if filename not in added_filenames]
   
 def get_changed_files(look_command):
