@@ -66,7 +66,7 @@ def command_output(cmd):
   return subprocess.Popen(cmd.split(), stdout=subprocess.PIPE).communicate()[0].split("\n")
 
 def main():
-  usage = """Usage: %prog REPO TXN
+  usage = """Usage: %prog REPOS TXN
 
 Run pre-commit verification on a repository transaction."""
   parser = OptionParser(usage=usage)
