@@ -2,6 +2,7 @@
 import sys
 import subprocess
 import re
+from optparse import OptionParser
 
 FILE_PATTERN = "^.*/db/migrations/[0-9+].*\.rb$"
 SKIP_KEYWORD = "skip-migration-check"
@@ -68,7 +69,6 @@ def main():
   usage = """Usage: %prog REPO TXN
 
 Run pre-commit verification on a repository transaction."""
-  from optparse import OptionParser
   parser = OptionParser(usage=usage)
   parser.add_option("-r", "--revision",
                     help="Test mode. Specify a revision instead of a transaction.",
