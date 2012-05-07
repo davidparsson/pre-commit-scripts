@@ -5,6 +5,8 @@ import re
 from optparse import OptionParser
 
 SVNLOOK_COMMAND = "svnlook"
+FILE_PATTERN = "^.*/db/migrations/[0-9]+.*\.rb$"
+SKIP_KEYWORD = "skip-migration-check"
 
 def check_filenames(file_pattern, skip_keyword, look_command):
   if should_skip_check_for_commit(skip_keyword, look_command):
@@ -73,7 +75,7 @@ def command_output(cmd):
   return result
 
 def main():
-  usage = """Usage: %prog REPOS TXN FILE_PATTERN SKIP_KEYWORD
+  usage = """Usage: %prog REPOS TXN
 
 Runs pre-commit verification on a repository transaction, verifying that
 matching files are added last, alphabetically."""
@@ -83,10 +85,10 @@ matching files are added last, alphabetically."""
                     action="store_true", default=False)
 
   try:
-    (options, (repos, transaction_or_revision, file_pattern, skip_keyword)) = parser.parse_args()
+    (options, (repos, transaction_or_revision)) = parser.parse_args()
     look_option = ("--transaction", "--revision")[options.revision]
     look_command = "%s %s %s %s %s" % (SVNLOOK_COMMAND, "%s", repos, look_option, transaction_or_revision)
-    return check_filenames(file_pattern, skip_keyword, look_command)
+    return check_filenames(FILE_PATTERN, SKIP_KEYWORD, look_command)
   except:
     parser.print_help()
     return 1
