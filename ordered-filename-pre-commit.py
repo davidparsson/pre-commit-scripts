@@ -66,7 +66,8 @@ def command_output(cmd):
 def main():
   usage = """Usage: %prog REPOS TXN FILE_PATTERN SKIP_KEYWORD
 
-Run pre-commit verification on a repository transaction."""
+Runs pre-commit verification on a repository transaction, verifying that
+matching files are added last, alphabetically."""
   parser = OptionParser(usage=usage)
   parser.add_option("-r", "--revision",
                     help="Test mode. Specify a revision instead of a transaction.",
