@@ -1,2 +1,2 @@
 #!/bin/bash
-python /absolute/path/to/ordered-filename-pre-commit.py $1 $2 "^.*/db/migrations/[0-9+].*\.rb$" "skip-migration-check"
+python /absolute/path/to/ordered-filename-pre-commit.py $1 $2 "^.*/db/migrations/[0-9]+.*\.rb$" "skip-migration-check"
