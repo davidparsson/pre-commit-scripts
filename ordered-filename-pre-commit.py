@@ -5,20 +5,22 @@ import re
 from optparse import OptionParser
 
 SVNLOOK_COMMAND = "svnlook"
-FILE_PATTERN = "^.*/db/migrations/[0-9]+.*\.rb$"
+FILE_PATTERN = "^.*/trunk/db/migrations/[0-9]+.*\.rb$"
 SKIP_KEYWORD = "skip-migration-check"
 
 def check_filenames(file_pattern, skip_keyword, look_command):
   if should_skip_check_for_commit(skip_keyword, look_command):
     return 0
   error = 0
-  added_filenames = get_files_added_in_commit(look_command)
-  for added_filename in added_filenames:
-    if should_check_file(file_pattern, added_filename):
-      last_existing_file = get_last_existing_file_after(added_filename, added_filenames, file_pattern, look_command)
-      if last_existing_file:
+  added_files = get_files_added_in_commit(look_command)
+  last_existing_file = None
+  for added_file in added_files:
+    if should_check_file(file_pattern, added_file):
+      if last_existing_file is None:
+        last_existing_filename = get_last_existing_matching_file(added_files, file_pattern, look_command)
+      if last_existing_filename and last_existing_filename > get_filename(added_file):
         sys.stderr.write("Error: The added file \"%s\" must have a filename \
-alphabetically after the existing \"%s\".\n" % (added_filename, last_existing_file))
+alphabetically after the existing \"%s\".\n" % (added_file, last_existing_filename))
         error += 1
   if error > 0:
     output_ignore_message(skip_keyword)
@@ -34,7 +36,10 @@ def should_check_file(file_pattern, filename):
   return bool(re.match(file_pattern, filename))
 
 def get_file_dir(filename):
-  return filename[0:filename.rfind("/") + 1]
+  return filename[:filename.rfind("/") + 1]
+
+def get_filename(filename):
+  return filename[filename.rfind("/") + 1:]
 
 def get_files_added_in_commit(look_command):
   def added(line):
@@ -43,20 +48,24 @@ def get_files_added_in_commit(look_command):
     return line[4:]
   return [filename(line) for line in get_changed_files(look_command) if added(line)]
 
-def get_last_existing_file_after(filename, added_filenames, file_pattern, look_command):
-  existing_files = get_existing_files_in(get_file_dir(filename), added_filenames, look_command)
-  existing_matched_files = [f for f in existing_files if should_check_file(file_pattern, f)]
+def get_last_existing_matching_file(added_files, file_pattern, look_command):
+  existing_matched_files = get_existing_matching_filenames(added_files, file_pattern, look_command)
   existing_matched_files.sort()
-  if existing_matched_files and filename < existing_matched_files[-1]:
+  if existing_matched_files:
     return existing_matched_files[-1]
-  return None
+  return ""
 
-def get_existing_files_in(path, added_filenames, look_command):
-  root_dirs = command_output("%s %s" % (look_command % "tree --full-paths --non-recursive", "."))
-  all_files = []
+def get_existing_matching_filenames(added_files, file_pattern, look_command):
+  root_dirs = get_files_in(".", look_command)
+  all_filenames = []
   for root_dir in root_dirs:
-    all_files.extend(command_output("%s %s" % (look_command % "tree --full-paths --non-recursive", root_dir + "trunk/db/migrations/")))
-  return [filename for filename in all_files if filename and filename not in added_filenames]
+    for file_path in get_files_in(root_dir + "trunk/db/migrations/", look_command):
+      if should_check_file(file_pattern, file_path) and file_path not in added_files:
+        all_filenames.append(get_filename(file_path))
+  return all_filenames
+
+def get_files_in(svn_directory, look_command):
+  return command_output("%s %s" % (look_command % "tree --full-paths --non-recursive", svn_directory))
   
 def get_changed_files(look_command):
   return command_output(look_command % "changed")
