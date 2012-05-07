@@ -5,7 +5,8 @@ import re
 from optparse import OptionParser
 
 SVNLOOK_COMMAND = "svnlook"
-FILE_PATTERN = "^.*/trunk/db/migrations/[0-9]+.*\.rb$"
+MIGRATION_PATH = "trunk/db/migrations/"
+FILE_PATTERN = "^.*/" + MIGRATION_PATH + "[0-9]+.*\.rb$"
 SKIP_KEYWORD = "skip-migration-check"
 
 def check_filenames(file_pattern, skip_keyword, look_command):
@@ -59,7 +60,7 @@ def get_existing_matching_filenames(added_files, file_pattern, look_command):
   root_dirs = get_files_in(".", look_command)
   all_filenames = []
   for root_dir in root_dirs:
-    for file_path in get_files_in(root_dir + "trunk/db/migrations/", look_command):
+    for file_path in get_files_in(root_dir + MIGRATION_PATH, look_command):
       if should_check_file(file_pattern, file_path) and file_path not in added_files:
         all_filenames.append(get_filename(file_path))
   return all_filenames
