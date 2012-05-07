@@ -50,8 +50,11 @@ def get_last_existing_file_after(filename, added_filenames, file_pattern, look_c
   return None
 
 def get_existing_files_in(path, added_filenames, look_command):
-  all_files = command_output("%s %s" % (look_command % "tree --full-paths --non-recursive", path))
-  return [filename for filename in all_files if filename not in added_filenames]
+  root_dirs = command_output("%s %s" % (look_command % "tree --full-paths --non-recursive", "."))
+  all_files = []
+  for root_dir in root_dirs:
+    all_files.extend(command_output("%s %s" % (look_command % "tree --full-paths --non-recursive", root_dir + "trunk/db/migrations/")))
+  return [filename for filename in all_files if filename and filename not in added_filenames]
   
 def get_changed_files(look_command):
   return command_output(look_command % "changed")
@@ -61,7 +64,13 @@ def get_commit_message(look_command):
 
 def command_output(cmd):
   "Captures a command's standard output."
-  return subprocess.Popen(cmd.split(), stdout=subprocess.PIPE).communicate()[0].split("\n")
+  dev_null = open("/dev/null","w")
+  result = []
+  try:
+    result = subprocess.Popen(cmd.split(), stdout=subprocess.PIPE, stderr=dev_null).communicate()[0].split("\n")
+  finally:
+    dev_null.close()
+  return result
 
 def main():
   usage = """Usage: %prog REPOS TXN FILE_PATTERN SKIP_KEYWORD
