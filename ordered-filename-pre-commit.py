@@ -1,5 +1,6 @@
 #!/usr/bin/python
 import sys
+import os
 import re
 import subprocess
 import optparse
@@ -81,7 +82,7 @@ def get_commit_message(look_command):
 
 def command_output(cmd):
   "Captures a command's standard output."
-  dev_null = open("/dev/null","w")
+  dev_null = open(os.devnull, "w")
   result = []
   try:
     result = subprocess.Popen(cmd.split(), stdout=subprocess.PIPE, stderr=dev_null).communicate()[0].split("\n")
