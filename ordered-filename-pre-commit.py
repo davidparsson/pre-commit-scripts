@@ -4,10 +4,15 @@ import subprocess
 import re
 from optparse import OptionParser
 
-SVNLOOK_COMMAND = "svnlook"
+# Sub path to check. Will become root_module/<MIGRATION_PATH>, e.g. module/trunk/db/migrations/
 MIGRATION_PATH = "trunk/db/migrations/"
+# Incoming file pattern to check.
 FILE_PATTERN = "^.*/" + MIGRATION_PATH + "[0-9]+.*\.rb$"
+# Ignore this pre-commit check if the keyword is included in commit message
 SKIP_KEYWORD = "skip-migration-check"
+
+# Path to svnlook executable
+SVNLOOK_COMMAND = "svnlook"
 
 def check_filenames(file_pattern, skip_keyword, look_command):
   if should_skip_check_for_commit(skip_keyword, look_command):
