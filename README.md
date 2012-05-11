@@ -13,7 +13,7 @@ Usage
 For an example of how to run the script in a hook, see the file `pre-commit`.
 
 <pre>
-Usage: ordered-filename-pre-commit.py REPOS TXN FILE_PATTERN SKIP_KEYWORD
+Usage: ordered-filename-pre-commit.py REPOS TXN
 
 Run pre-commit verification on a repository transaction.
 
