@@ -17,8 +17,8 @@ SKIP_KEYWORD = "skip-migration-check"
 # Path to svnlook executable
 SVNLOOK_COMMAND = "svnlook"
 
-def check_filenames(skip_keyword, look_command):
-  if should_skip_check_for_commit(skip_keyword, look_command):
+def check_filenames(look_command):
+  if should_skip_check_for_commit(look_command):
     return 0
   error = 0
   added_files = get_files_added_in_commit(look_command)
@@ -32,14 +32,14 @@ def check_filenames(skip_keyword, look_command):
 alphabetically after the existing \"%s\".\n" % (added_file, last_existing_filename))
         error += 1
   if error > 0:
-    output_ignore_message(skip_keyword)
+    output_ignore_message()
   return error
 
-def should_skip_check_for_commit(skip_keyword, look_command):
-  return skip_keyword in " ".join(get_commit_message(look_command)).split(" ")
+def should_skip_check_for_commit(look_command):
+  return SKIP_KEYWORD in " ".join(get_commit_message(look_command)).split(" ")
 
-def output_ignore_message(skip_keyword):
-  sys.stderr.write("If you want to commit this anyway, include \"%s\" in the commit message.\n" % skip_keyword)
+def output_ignore_message():
+  sys.stderr.write("If you want to commit this anyway, include \"%s\" in the commit message.\n" % SKIP_KEYWORD)
 
 def should_check_file(file_path):
   return bool(re.match("^[^/]+/" + MIGRATION_PATH + FILE_PATTERN, file_path))
@@ -106,7 +106,7 @@ matching files are added last, alphabetically."""
     (options, (repos, transaction_or_revision)) = parser.parse_args()
     look_option = ("--transaction", "--revision")[options.revision]
     look_command = "%s %s %s %s %s" % (SVNLOOK_COMMAND, "%s", repos, look_option, transaction_or_revision)
-    return check_filenames(SKIP_KEYWORD, look_command)
+    return check_filenames(look_command)
   except:
     parser.print_help()
     return 1
