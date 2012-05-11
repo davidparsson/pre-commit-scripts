@@ -1,8 +1,8 @@
 #!/usr/bin/python
 import sys
-import subprocess
 import re
-from optparse import OptionParser
+import subprocess
+import optparse
 
 # Sub path to check. Will become root_module/<MIGRATION_PATH>, e.g. module/trunk/db/migrations/
 MIGRATION_PATH = "trunk/db/migrations/"
@@ -94,7 +94,7 @@ def main():
 
 Runs pre-commit verification on a repository transaction, verifying that
 matching files are added last, alphabetically."""
-  parser = OptionParser(usage=usage)
+  parser = optparse.OptionParser(usage=usage)
   parser.add_option("-r", "--revision",
                     help="Test mode. Specify a revision instead of a transaction.",
                     action="store_true", default=False)
