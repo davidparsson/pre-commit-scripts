@@ -10,7 +10,7 @@ executed alphabetically.
 Usage
 -----
 
-For an example of how to run the script in a hook, see the file `pre-commit`.
+For an example of how to run the script in a hook, see the file `pre-commit-example`.
 
 <pre>
 Usage: ordered-filename-pre-commit.py REPOS TXN
