@@ -1,2 +1,2 @@
 #!/bin/bash
-/absolute/path/to/ordered-filename-pre-commit.py $1 $2
+/absolute/path/to/ordered_filename_pre_commit.py $1 $2

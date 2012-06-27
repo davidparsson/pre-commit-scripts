@@ -1,10 +1,10 @@
 Ordered Filename Pre-Commit Check
 =================================
 
-A pre-commit script in python checking that certain files are added last,
-alphabetically.
+A pre-commit script in python checking that certain files are added, modifier
+or removed last, alphabetically. Kind of like a stack.
 
-This is for example useful for projects where database migration scripts are
+This is for example useful in projects where database migration scripts are
 executed alphabetically.
 
 What it does
@@ -30,13 +30,16 @@ for every module, it would **not** be possible to commit a file named
 `module1/db/05.migration` since a file named `06.migration` exists in module2.
 A correct filename would rather be module1/db/07.migration`.
 
+Neither would it be possible to modify or remove any migration but
+`module2/db/06.migration`.
+
 Usage
 -----
 
 For an example of how to run the script in a hook, see the file `pre-commit-example`.
 
 <pre>
-Usage: ordered-filename-pre-commit.py REPOS TXN
+Usage: ordered_filename_pre_commit.py REPOS TXN
 
 Run pre-commit verification on a repository transaction.
 
