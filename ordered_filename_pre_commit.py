@@ -20,14 +20,27 @@ def check_filenames(commit_details, repository_details):
         return 0
     error = 0
     last_existing_file = None
-    changed_files = commit_details.get_added_files()
+    added_files = commit_details.get_added_files()
+    deleted_files = commit_details.get_deleted_files()
+    modified_files = commit_details.get_modified_files()
+    changed_files = []
+    changed_files.extend(added_files)
+    changed_files.extend(deleted_files)
+    changed_files.extend(modified_files)
     for changed_file in changed_files:
         if should_check_file(changed_file):
             if last_existing_file is None:
                 last_existing_filename = get_last_existing_matching_file(changed_files, repository_details)
             if last_existing_filename and last_existing_filename > get_filename(changed_file):
-                sys.stderr.write("Error: The added file \"%s\" must have a filename \
+                if changed_file in added_files:
+                    sys.stderr.write("Error: The added file \"%s\" must have a filename \
 alphabetically after the existing \"%s\".\n" % (changed_file, last_existing_filename))
+                elif changed_file in modified_files:
+                    sys.stderr.write("Error: The file \"%s\" may not be modified \
+since later migrations exist (\"%s\").\n" % (changed_file, last_existing_filename))
+                else:
+                    sys.stderr.write("Error: The file \"%s\" may not be deleted \
+since later migrations exist (\"%s\").\n" % (changed_file, last_existing_filename))
                 error += 1
     if error > 0:
         output_ignore_message()

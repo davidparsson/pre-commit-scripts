@@ -41,7 +41,7 @@ for i in revisions(40, 56):
     rd = RepositoryDetails(REPO, i, test_mode=True)
     result = check_filenames(cd, rd)
     print "Result: %d" % result
-    if i in (45, 49, 52,):
+    if i in (45, 49,):
         assert result == 1
     elif i in (51,):
         assert result == 2

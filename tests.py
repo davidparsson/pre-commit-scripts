@@ -22,6 +22,8 @@ class SvnLookWrapperTestCase(unittest.TestCase):
         when(self.commit_details).get_copied_files().thenReturn(self.copied_files)
         self.deleted_files = []
         when(self.commit_details).get_deleted_files().thenReturn(self.deleted_files)
+        self.modified_files = []
+        when(self.commit_details).get_modified_files().thenReturn(self.modified_files)
         self.given_commit_message("")
 
         self.repository_details = mock(RepositoryDetails)
@@ -55,6 +57,9 @@ class SvnLookWrapperTestCase(unittest.TestCase):
 
     def given_file_deleted_in_commit(self, file_path):
         self.deleted_files.append(file_path)
+
+    def given_file_modified_in_commit(self, file_path):
+        self.modified_files.append(file_path)
 
 
 class NoChangesInTagsTest(SvnLookWrapperTestCase):
@@ -130,21 +135,54 @@ class OrderedFilenameTest(SvnLookWrapperTestCase):
         self.given_file_added_in_commit("module/" + MIGRATION_PATH + "0.rb")
         self.number_of_errors_are(0)
 
-    def test_fails_when_committing_file_before_existing_in_same_module(self):
+    def test_fails_when_adding_file_before_existing_in_same_module(self):
         self.given_existing_files("module/", MIGRATION_PATH, "1.rb")
         self.given_file_added_in_commit("module/" + MIGRATION_PATH + "0.rb")
         self.number_of_errors_are(1)
+
+    def test_fails_when_deleting_file_before_last_existing_in_same_module(self):
+        self.given_existing_files("module/", MIGRATION_PATH, "0.rb", "1.rb")
+        self.given_file_deleted_in_commit("module/" + MIGRATION_PATH + "0.rb")
+        self.number_of_errors_are(1)
+
+    def test_fails_when_modifying_file_before_last_existing_in_same_module(self):
+        self.given_existing_files("module/", MIGRATION_PATH, "0.rb", "1.rb")
+        self.given_file_modified_in_commit("module/" + MIGRATION_PATH + "0.rb")
+        self.number_of_errors_are(1)
+
+    def test_prints_message_when_adding_file_before_existing_in_same_module(self):
+        self.given_existing_files("module/", MIGRATION_PATH, "1.rb")
+        self.given_file_added_in_commit("module/" + MIGRATION_PATH + "0.rb")
+        check_filenames(self.commit_details, self.repository_details)
+        verify(sys.stderr).write("Error: The added file \"%s\" must have a filename \
+alphabetically after the existing \"%s\".\n" % ("module/" + MIGRATION_PATH + "0.rb", "1.rb"))
+
+    def test_prints_message_when_deleting_file_before_last_existing_in_same_module(self):
+        self.given_existing_files("module/", MIGRATION_PATH, "0.rb", "1.rb")
+        self.given_file_deleted_in_commit("module/" + MIGRATION_PATH + "0.rb")
+        check_filenames(self.commit_details, self.repository_details)
+        verify(sys.stderr).write("Error: The file \"%s\" may not be deleted \
+since later migrations exist (\"%s\").\n" % ("module/" + MIGRATION_PATH + "0.rb", "1.rb"))
+
+    def test_prints_message_when_modifying_file_before_last_existing_in_same_module(self):
+        self.given_existing_files("module/", MIGRATION_PATH, "0.rb", "1.rb")
+        self.given_file_modified_in_commit("module/" + MIGRATION_PATH + "0.rb")
+        check_filenames(self.commit_details, self.repository_details)
+        verify(sys.stderr).write("Error: The file \"%s\" may not be modified \
+since later migrations exist (\"%s\").\n" % ("module/" + MIGRATION_PATH + "0.rb", "1.rb"))
+
 
     def test_does_not_print_to_stderr_when_successful(self):
         self.given_file_added_in_commit("module/" + MIGRATION_PATH + "0.rb")
         check_filenames(self.commit_details, self.repository_details)
         verify(sys.stderr, times(0)).write(any())
 
-    def test_prints_to_stderr_when_failing(self):
+    def test_prints_help_message_when_failing(self):
         self.given_existing_files("module/", MIGRATION_PATH, "1.rb")
         self.given_file_added_in_commit("module/" + MIGRATION_PATH + "0.rb")
         check_filenames(self.commit_details, self.repository_details)
-        verify(sys.stderr, times(2)).write(any())
+        verify(sys.stderr).write("If you want to commit this anyway, \
+include \"%s\" in the commit message.\n" % MIGRATION_SKIP_KEYWORD)
 
     def test_does_not_fail_when_commit_message_contains_skip_keyword(self):
         self.given_existing_files("module/", MIGRATION_PATH, "1.rb")
