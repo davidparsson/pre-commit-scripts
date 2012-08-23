@@ -1,9 +1,8 @@
 #!/usr/bin/python
 import sys
-import os
 import re
-import subprocess
 import optparse
+from svn_look_wrappers import CommitDetails, RepositoryDetails
 
 # Sub path to check. Final path will result in root_module/<MIGRATION_PATH>, 
 # e.g. mymodule/trunk/db/migrations/
@@ -17,16 +16,16 @@ SKIP_KEYWORD = "skip-migration-check"
 # Path to svnlook executable
 SVNLOOK_COMMAND = "svnlook"
 
-def check_filenames(look_command):
-  if should_skip_check_for_commit(look_command):
+def check_filenames(commit_details, repository_details):
+  if should_skip_check_for_commit(commit_details):
     return 0
   error = 0
-  added_files = get_files_added_in_commit(look_command)
   last_existing_file = None
+  added_files = commit_details.get_added_files()
   for added_file in added_files:
     if should_check_file(added_file):
       if last_existing_file is None:
-        last_existing_filename = get_last_existing_matching_file(added_files, look_command)
+        last_existing_filename = get_last_existing_matching_file(added_files, repository_details)
       if last_existing_filename and last_existing_filename > get_filename(added_file):
         sys.stderr.write("Error: The added file \"%s\" must have a filename \
 alphabetically after the existing \"%s\".\n" % (added_file, last_existing_filename))
@@ -35,8 +34,8 @@ alphabetically after the existing \"%s\".\n" % (added_file, last_existing_filena
     output_ignore_message()
   return error
 
-def should_skip_check_for_commit(look_command):
-  return SKIP_KEYWORD in " ".join(get_commit_message(look_command)).split(" ")
+def should_skip_check_for_commit(commit_details):
+  return SKIP_KEYWORD in commit_details.get_commit_message().split()
 
 def output_ignore_message():
   sys.stderr.write("If you want to commit this anyway, include \"%s\" in the commit message.\n" % SKIP_KEYWORD)
@@ -50,47 +49,22 @@ def get_file_dir(filename):
 def get_filename(filename):
   return filename[filename.rfind("/") + 1:]
 
-def get_files_added_in_commit(look_command):
-  def added(line):
-    return line and line[0] == "A"
-  def filename(line):
-    return line[4:]
-  return [filename(line) for line in get_changed_files(look_command) if added(line)]
-
-def get_last_existing_matching_file(added_files, look_command):
-  existing_matched_files = get_existing_matching_filenames(added_files, look_command)
+def get_last_existing_matching_file(added_files, repository_details):
+  existing_matched_files = get_existing_matching_filenames(added_files, repository_details)
   existing_matched_files.sort()
   if existing_matched_files:
     return existing_matched_files[-1]
   return ""
 
-def get_existing_matching_filenames(added_files, look_command):
-  root_dirs = get_files_in(".", look_command)
+def get_existing_matching_filenames(added_files, repository_details):
+  root_dirs = repository_details.get_files_in(".")
   all_filenames = []
   for root_dir in root_dirs:
-    for file_path in get_files_in(root_dir + MIGRATION_PATH, look_command):
+    for file_path in repository_details.get_files_in(root_dir + MIGRATION_PATH):
       if should_check_file(file_path) and file_path not in added_files:
         all_filenames.append(get_filename(file_path))
   return all_filenames
-
-def get_files_in(svn_directory, look_command):
-  return command_output("%s %s" % (look_command % "tree --full-paths --non-recursive", svn_directory))
   
-def get_changed_files(look_command):
-  return command_output(look_command % "changed")
-
-def get_commit_message(look_command):
-  return command_output(look_command % "log")
-
-def command_output(cmd):
-  "Captures a command's standard output."
-  dev_null = open(os.devnull, "w")
-  result = []
-  try:
-    result = subprocess.Popen(cmd.split(), stdout=subprocess.PIPE, stderr=dev_null).communicate()[0].split("\n")
-  finally:
-    dev_null.close()
-  return result
 
 def main():
   usage = """Usage: %prog REPOS TXN
@@ -104,9 +78,9 @@ matching files are added last, alphabetically."""
 
   try:
     (options, (repos, transaction_or_revision)) = parser.parse_args()
-    look_option = ("--transaction", "--revision")[options.revision]
-    look_command = "%s %s %s %s %s" % (SVNLOOK_COMMAND, "%s", repos, look_option, transaction_or_revision)
-    return check_filenames(look_command)
+    commit_details = CommitDetails(repos, transaction_or_revision, test_mode=options.revision)
+    repository_details = RepositoryDetails(repos, transaction_or_revision, test_mode=options.revision)
+    return check_filenames(commit_details, repository_details)
   except:
     parser.print_help()
     return 1
