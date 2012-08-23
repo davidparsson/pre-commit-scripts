@@ -3,9 +3,11 @@ import unittest
 import sys
 from mockito import mock, when, verify, any, times
 from svn_look_wrappers import CommitDetails, RepositoryDetails
-from ordered_filename_pre_commit import check_filenames, MIGRATION_PATH, SKIP_KEYWORD
+from ordered_filename_pre_commit import check_filenames, MIGRATION_PATH, \
+    SKIP_KEYWORD as MIGRATION_SKIP_KEYWORD
 from require_commit_message_pre_commit import check_commit_message
-from no_changes_in_tags_pre_commit import fail_on_tag_changes
+from no_changes_in_tags_pre_commit import fail_on_tag_changes, \
+    SKIP_KEYWORD as TAG_SKIP_KEYWORD
 
 
 class SvnLookWrapperTestCase(unittest.TestCase):
@@ -54,6 +56,11 @@ class NoChangesInTagsTest(SvnLookWrapperTestCase):
     def test_fails_when_committing_to_a_tag(self):
         self.given_file_modified_in_commit("module/tags/tagname/file.txt")
         self.then_error_code_is(1)
+
+    def test_allows_commit_when_message_contains_skip_keyword(self):
+        self.given_commit_message(TAG_SKIP_KEYWORD)
+        self.given_file_modified_in_commit("module/tags/tagname/file.txt")
+        self.then_error_code_is(0)
 
     def test_prints_error_message_when_committing_to_tag(self):
         self.given_file_modified_in_commit("module/tags/tagname/file.txt")
@@ -118,7 +125,7 @@ class OrderedFilenameTest(SvnLookWrapperTestCase):
     def test_does_not_fail_when_commit_message_contains_skip_keyword(self):
         self.given_existing_files("module/", MIGRATION_PATH, "1.rb")
         self.given_file_added_in_commit("module/" + MIGRATION_PATH + "0.rb")
-        self.given_commit_message(SKIP_KEYWORD)
+        self.given_commit_message(MIGRATION_SKIP_KEYWORD)
         self.number_of_errors_are(0)
 
     def test_fails_when_committing_file_before_existing_in_other_module(self):
