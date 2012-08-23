@@ -1,5 +1,36 @@
-Ordered Filename Pre-Commit Check
-=================================
+Pre-Commit Hooks
+================
+
+Contains the following pre-commit hooks:
+
+- Require commit messages of a certain length
+- Require new files in certain folders to be added last, alphabetically
+
+More details below.
+
+Usage
+-----
+
+For an example of how to run the scripts in a hook, see the file `pre-commit-example`.
+
+<pre>
+Usage: [script].py REPOS TXN
+
+Run pre-commit verification on a repository transaction.
+
+Options:
+  -h, --help      show this help message and exit
+  -r, --revision  Test mode. Specify a revision instead of a transaction.
+</pre>
+
+Require Commit Message
+======================
+
+Requires all commit message to be at least of a certain length. Default is 3 characters.
+
+
+Ordered Filename Commit
+=======================
 
 A pre-commit script in python checking that certain files are added, modifier
 or removed last, alphabetically. Kind of like a stack.
@@ -32,18 +63,3 @@ A correct filename would rather be module1/db/07.migration`.
 
 Neither would it be possible to modify or remove any migration but
 `module2/db/06.migration`.
-
-Usage
------
-
-For an example of how to run the script in a hook, see the file `pre-commit-example`.
-
-<pre>
-Usage: ordered_filename_pre_commit.py REPOS TXN
-
-Run pre-commit verification on a repository transaction.
-
-Options:
-  -h, --help      show this help message and exit
-  -r, --revision  Test mode. Specify a revision instead of a transaction.
-</pre>
