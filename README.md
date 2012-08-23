@@ -34,7 +34,7 @@ Tagged Files Modification
 
 Disallows any other changes than copy and delete on created and existing tagged files.
 
-This check can be skipped by supplying a keyword in the commit message.
+This check can be skipped by supplying a keyword in the commit message. Default is `skip-tag-check`.
 
 
 Ordered Filename Commit
@@ -45,7 +45,7 @@ A pre-commit script in python checking that certain files are added, alphabetica
 This is for example useful in projects where database migration scripts are
 executed alphabetically.
 
-This check can be skipped by supplying a keyword in the commit message.
+This check can be skipped by supplying a keyword in the commit message. Default is `skip-migration-check`.
 
 ### What it does
 
