@@ -32,7 +32,9 @@ Requires all commit message to be at least of a certain length. Default is 3 cha
 Tagged Files Modification
 -------------------------
 
-Disallows commits with modifications to files in a path matching a tags regex.
+Disallows any other changes than copy and delete on created and existing tagged files.
+
+This check can be skipped by supplying a keyword in the commit message.
 
 
 Ordered Filename Commit
@@ -42,6 +44,8 @@ A pre-commit script in python checking that certain files are added, alphabetica
 
 This is for example useful in projects where database migration scripts are
 executed alphabetically.
+
+This check can be skipped by supplying a keyword in the commit message.
 
 ### What it does
 
