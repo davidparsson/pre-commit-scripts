@@ -8,8 +8,7 @@ Contains the following pre-commit hooks:
 
 More details below.
 
-Usage
------
+### Usage
 
 For an example of how to run the scripts in a hook, see the file `pre-commit-example`.
 
@@ -24,21 +23,20 @@ Options:
 </pre>
 
 Require Commit Message
-======================
+----------------------
 
 Requires all commit message to be at least of a certain length. Default is 3 characters.
 
 
 Ordered Filename Commit
-=======================
+-----------------------
 
 A pre-commit script in python checking that certain files are added, alphabetically.
 
 This is for example useful in projects where database migration scripts are
 executed alphabetically.
 
-What it does
-------------
+### What it does
 
 Consider an SVN repository with the following contents:
 
