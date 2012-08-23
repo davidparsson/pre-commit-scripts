@@ -1,9 +1,9 @@
 #!/usr/bin/python
 import unittest
-from mockito import mock, when, any
+import sys
+from mockito import mock, when, verify, any, times
 from svn_look_wrappers import CommitDetails, RepositoryDetails
-from ordered_filename_pre_commit import check_filenames, MIGRATION_PATH, SKIP_KEYWORD, \
-        sys
+from ordered_filename_pre_commit import check_filenames, MIGRATION_PATH, SKIP_KEYWORD
 
 class OrderedFilenameTest(unittest.TestCase):
     
@@ -32,6 +32,17 @@ class OrderedFilenameTest(unittest.TestCase):
         self.given_existing_files("module/", MIGRATION_PATH, "1.rb")
         self.given_file_added_in_commit("module/" + MIGRATION_PATH + "0.rb")
         self.number_of_errors_are(1)
+
+    def test_does_not_print_to_stderr_when_successful(self):
+        self.given_file_added_in_commit("module/" + MIGRATION_PATH + "0.rb")
+        check_filenames(self.commit_details, self.repository_details)
+        verify(sys.stderr, times(0)).write(any())
+
+    def test_prints_to_stderr_when_failing(self):
+        self.given_existing_files("module/", MIGRATION_PATH, "1.rb")
+        self.given_file_added_in_commit("module/" + MIGRATION_PATH + "0.rb")
+        check_filenames(self.commit_details, self.repository_details)
+        verify(sys.stderr, times(2)).write(any())
 
     def test_does_not_fail_when_commit_message_contains_skip_keyword(self):
         self.given_existing_files("module/", MIGRATION_PATH, "1.rb")
