@@ -54,28 +54,47 @@ class SvnLookWrapper(object):
         return result
 
 class CommitDetails(SvnLookWrapper):
+    STATUS = 0
+    FILE = 1
+    COPIED = 2
+
     def get_added_files(self):
         return self._get_files_with_status("A")
 
     def get_modified_files(self):
         return self._get_files_with_status("U")
 
+    def get_deleted_files(self):
+        return self._get_files_with_status("D")
+
+    def get_files(self):
+        return self._get_files_with_status("A", "D", "U", "_")
+
+    def get_copied_files(self):
+        files = []
+        for change in self._get_changes():
+            if change[self.COPIED]:
+                files.append(change[self.FILE])
+        return files
+
     def get_commit_message(self):
         return "\n".join(self._svn_look("log"))
 
-    def _get_files_with_status(self, status):
+    def _get_files_with_status(self, *statuses):
         files = []
         for change in self._get_changes():
-            if change[0] == status:
-                files.append(change[1])
+            if change[self.STATUS] in statuses:
+                files.append(change[self.FILE])
         return files
 
     def _get_changes(self):
         changes = []
-        for change in self._svn_look("changed"):
-            status = change[:4].strip()
+        for change in self._svn_look("changed --copy-info"):
+            status = change[0].strip()
             file = change[4:]
-            changes.append((status, file))
+            copied = change[2] == "+"
+            if status:
+                changes.append((status, file, copied))
         return changes
 
 class RepositoryDetails(SvnLookWrapper):

@@ -3,16 +3,19 @@ import sys
 import re
 from svn_look_wrappers import get_option_parser, build_wrappers
 
-TAGS_PATH_PATTERN = "^[^/]+/tags/"
+TAGS_PATH_PATTERN = "^[^/]+\/tags\/.+"
 SKIP_KEYWORD = "skip-tag-check"
 
 def fail_on_tag_changes(commit_details):
     if SKIP_KEYWORD in commit_details.get_commit_message().split():
         return 0
-    for modified_file in commit_details.get_modified_files():
+    for modified_file in commit_details.get_files():
         if re.match(TAGS_PATH_PATTERN, modified_file):
-            sys.stderr.write("Error: Modifying tagged files is not permitted!")
-            return 1
+            copied_and_deleted_files = commit_details.get_copied_files()
+            copied_and_deleted_files.extend(commit_details.get_deleted_files())
+            if modified_file not in copied_and_deleted_files:
+                sys.stderr.write("Error: Modifying tagged files is not permitted!")
+                return 1
     return 0
 
 def main():

@@ -16,8 +16,12 @@ class SvnLookWrapperTestCase(unittest.TestCase):
         self.commit_details = mock(CommitDetails)
         self.added_files = []
         when(self.commit_details).get_added_files().thenReturn(self.added_files)
-        self.modified_files = []
-        when(self.commit_details).get_modified_files().thenReturn(self.modified_files)
+        self.commit_files = []
+        when(self.commit_details).get_files().thenReturn(self.commit_files)
+        self.copied_files = []
+        when(self.commit_details).get_copied_files().thenReturn(self.copied_files)
+        self.deleted_files = []
+        when(self.commit_details).get_deleted_files().thenReturn(self.deleted_files)
         self.given_commit_message("")
 
         self.repository_details = mock(RepositoryDetails)
@@ -43,32 +47,52 @@ class SvnLookWrapperTestCase(unittest.TestCase):
     def given_file_added_in_commit(self, file_path):
         self.added_files.append(file_path)
 
-    def given_file_modified_in_commit(self, file_path):
-        self.modified_files.append(file_path)
+    def given_file_in_commit(self, file_path):
+        self.commit_files.append(file_path)
+
+    def given_file_copied_in_commit(self, file_path):
+        self.copied_files.append(file_path)
+
+    def given_file_deleted_in_commit(self, file_path):
+        self.deleted_files.append(file_path)
 
 
 class NoChangesInTagsTest(SvnLookWrapperTestCase):
 
     def test_does_not_fail_when_committing_to_trunk(self):
-        self.given_file_modified_in_commit("module/trunk/file.txt")
+        self.given_file_in_commit("module/trunk/file.txt")
         self.then_error_code_is(0)
 
     def test_fails_when_committing_to_a_tag(self):
-        self.given_file_modified_in_commit("module/tags/tagname/file.txt")
+        self.given_file_in_commit("module/tags/tagname/file.txt")
         self.then_error_code_is(1)
 
     def test_allows_commit_when_message_contains_skip_keyword(self):
         self.given_commit_message(TAG_SKIP_KEYWORD)
-        self.given_file_modified_in_commit("module/tags/tagname/file.txt")
+        self.given_file_in_commit("module/tags/tagname/file.txt")
+        self.then_error_code_is(0)
+
+    def test_allows_adding_tags_directory(self):
+        self.given_file_in_commit("module/tags/")
+        self.then_error_code_is(0)
+
+    def test_allows_copied_files(self):
+        self.given_file_in_commit("module/tags/tagname/file.txt")
+        self.given_file_copied_in_commit("module/tags/tagname/file.txt")
+        self.then_error_code_is(0)
+
+    def test_allows_deleted_files(self):
+        self.given_file_in_commit("module/tags/tagname/file.txt")
+        self.given_file_deleted_in_commit("module/tags/tagname/file.txt")
         self.then_error_code_is(0)
 
     def test_prints_error_message_when_committing_to_tag(self):
-        self.given_file_modified_in_commit("module/tags/tagname/file.txt")
+        self.given_file_in_commit("module/tags/tagname/file.txt")
         fail_on_tag_changes(self.commit_details)
         verify(self.stderr).write("Error: Modifying tagged files is not permitted!")
 
     def test_does_not_fail_when_committing_to_tags_folder_in_trunk(self):
-        self.given_file_modified_in_commit("module/trunk/tags/file.txt")
+        self.given_file_in_commit("module/trunk/tags/file.txt")
         self.then_error_code_is(0)
 
     def then_error_code_is(self, error_code):

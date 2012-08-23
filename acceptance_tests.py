@@ -48,11 +48,11 @@ for i in revisions(40, 56):
     else:
         assert result == 0
 
-for i in revisions(50, 63):
+for i in revisions(50, 66):
     cd = CommitDetails(REPO, i, test_mode=True)
     result = fail_on_tag_changes(cd)
     print "Result: %d" % result
-    if i in (60,):
+    if i in (60, 65, 66,):
         assert result == 1
     else:
         assert result == 0
