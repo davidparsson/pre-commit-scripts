@@ -21,7 +21,7 @@ class SvnLookWrapper(object):
         self._test_mode = test_mode
         pass
     
-    def _svnlook(self, command, args=None):
+    def _svn_look(self, command, args=None):
         "Captures a command's standard output."
         look_option = "--revision" if self._test_mode else "--transaction"
         look_command = "%s %s %s %s %s" % (SVNLOOK_COMMAND, command, self._repository, look_option, self._transaction)
@@ -47,11 +47,11 @@ class CommitDetails(SvnLookWrapper):
         return files
     
     def get_commit_message(self):
-        return "\n".join(self._svnlook("log"))
+        return "\n".join(self._svn_look("log"))
 
     def _get_changes(self):
         changes = []
-        for change in self._svnlook("changed"):
+        for change in self._svn_look("changed"):
             status = change[:4].strip()
             file = change[4:]
             changes.append((status, file))
@@ -59,4 +59,4 @@ class CommitDetails(SvnLookWrapper):
 
 class RepositoryDetails(SvnLookWrapper):
     def get_files_in(self, repository_directory):
-        return self._svnlook("tree --full-paths --non-recursive", repository_directory)
+        return self._svn_look("tree --full-paths --non-recursive", repository_directory)
