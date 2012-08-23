@@ -26,7 +26,7 @@ Options:
 Require Commit Message
 ----------------------
 
-Requires all commit message to be at least of a certain length. Default is 3 characters.
+Requires all commit message to have a configured minimum length. Default is 3 characters.
 
 
 Tagged Files Modification
