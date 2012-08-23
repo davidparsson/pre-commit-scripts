@@ -16,7 +16,7 @@ def fail_on_tag_changes(commit_details):
             copied_and_deleted_files = commit_details.get_copied_files()
             copied_and_deleted_files.extend(commit_details.get_deleted_files())
             if modified_file not in copied_and_deleted_files:
-                sys.stderr.write("Error: Modifying tagged files is not permitted!")
+                sys.stderr.write("Error: Modifying tagged files is not permitted!\n")
                 return 1
     return 0
 

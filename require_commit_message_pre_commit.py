@@ -6,7 +6,7 @@ REQUIRED_COMMIT_MESSAGE_LENGTH = 3
 
 def check_commit_message(commit_details):
     if len(commit_details.get_commit_message()) < REQUIRED_COMMIT_MESSAGE_LENGTH:
-        sys.stderr.write("Error: Please enter a descriptive commit message!")
+        sys.stderr.write("Error: Please enter a descriptive commit message!\n")
         return 1
     return 0
 

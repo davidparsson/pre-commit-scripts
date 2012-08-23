@@ -94,7 +94,7 @@ class NoChangesInTagsTest(SvnLookWrapperTestCase):
     def test_prints_error_message_when_committing_to_tag(self):
         self.given_file_in_commit("module/tags/tagname/file.txt")
         fail_on_tag_changes(self.commit_details)
-        verify(self.stderr).write("Error: Modifying tagged files is not permitted!")
+        verify(self.stderr).write("Error: Modifying tagged files is not permitted!\n")
 
     def test_does_not_fail_when_committing_to_tags_folder_in_trunk(self):
         self.given_file_in_commit("module/trunk/tags/file.txt")
@@ -122,7 +122,7 @@ class RequireCommitMessageTest(SvnLookWrapperTestCase):
     def test_prints_error_message_when_message_to_short(self):
         self.given_commit_message("..")
         check_commit_message(self.commit_details)
-        verify(self.stderr).write("Error: Please enter a descriptive commit message!")
+        verify(self.stderr).write("Error: Please enter a descriptive commit message!\n")
 
     def then_error_code_is(self, number_of_errors):
         self.assertEquals(number_of_errors,
