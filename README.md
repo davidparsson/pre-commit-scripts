@@ -32,8 +32,7 @@ Requires all commit message to be at least of a certain length. Default is 3 cha
 Ordered Filename Commit
 =======================
 
-A pre-commit script in python checking that certain files are added, modifier
-or removed last, alphabetically. Kind of like a stack.
+A pre-commit script in python checking that certain files are added, alphabetically.
 
 This is for example useful in projects where database migration scripts are
 executed alphabetically.
@@ -60,6 +59,3 @@ Assuming that the script is set up to match the `*.migration` files in the path 
 for every module, it would **not** be possible to commit a file named
 `module1/db/05.migration` since a file named `06.migration` exists in module2.
 A correct filename would rather be module1/db/07.migration`.
-
-Neither would it be possible to modify or remove any migration but
-`module2/db/06.migration`.
