@@ -3,7 +3,9 @@ import sys
 import re
 from svn_look_wrappers import get_option_parser, build_wrappers
 
+# Files matching this pattern will be treated as tagged
 TAGS_PATH_PATTERN = "^[^/]+\/tags\/.+"
+# Check will be skipped if commit message contains the SKIP_KEYWORD
 SKIP_KEYWORD = "skip-tag-check"
 
 def fail_on_tag_changes(commit_details):
