@@ -20,14 +20,14 @@ def check_filenames(commit_details, repository_details):
         return 0
     error = 0
     last_existing_file = None
-    added_files = commit_details.get_added_files()
-    for added_file in added_files:
-        if should_check_file(added_file):
+    changed_files = commit_details.get_added_files()
+    for changed_file in changed_files:
+        if should_check_file(changed_file):
             if last_existing_file is None:
-                last_existing_filename = get_last_existing_matching_file(added_files, repository_details)
-            if last_existing_filename and last_existing_filename > get_filename(added_file):
+                last_existing_filename = get_last_existing_matching_file(changed_files, repository_details)
+            if last_existing_filename and last_existing_filename > get_filename(changed_file):
                 sys.stderr.write("Error: The added file \"%s\" must have a filename \
-alphabetically after the existing \"%s\".\n" % (added_file, last_existing_filename))
+alphabetically after the existing \"%s\".\n" % (changed_file, last_existing_filename))
                 error += 1
     if error > 0:
         output_ignore_message()
@@ -48,19 +48,19 @@ def get_file_dir(filename):
 def get_filename(filename):
     return filename[filename.rfind("/") + 1:]
 
-def get_last_existing_matching_file(added_files, repository_details):
-    existing_matched_files = get_existing_matching_filenames(added_files, repository_details)
+def get_last_existing_matching_file(files, repository_details):
+    existing_matched_files = get_existing_matching_filenames(files, repository_details)
     existing_matched_files.sort()
     if existing_matched_files:
         return existing_matched_files[-1]
     return ""
 
-def get_existing_matching_filenames(added_files, repository_details):
+def get_existing_matching_filenames(files, repository_details):
     root_dirs = repository_details.get_files_in(".")
     all_filenames = []
     for root_dir in root_dirs:
         for file_path in repository_details.get_files_in(root_dir + MIGRATION_PATH):
-            if should_check_file(file_path) and file_path not in added_files:
+            if should_check_file(file_path) and file_path not in files:
                 all_filenames.append(get_filename(file_path))
     return all_filenames
     
