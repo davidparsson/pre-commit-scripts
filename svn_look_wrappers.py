@@ -55,14 +55,20 @@ class SvnLookWrapper(object):
 
 class CommitDetails(SvnLookWrapper):
     def get_added_files(self):
-        files = []
-        for change in self._get_changes():
-            if change[0] == "A":
-                files.append(change[1])
-        return files
-    
+        return self._get_files_with_status("A")
+
+    def get_modified_files(self):
+        return self._get_files_with_status("M")
+
     def get_commit_message(self):
         return "\n".join(self._svn_look("log"))
+
+    def _get_files_with_status(self, status):
+        files = []
+        for change in self._get_changes():
+            if change[0] == status:
+                files.append(change[1])
+        return files
 
     def _get_changes(self):
         changes = []

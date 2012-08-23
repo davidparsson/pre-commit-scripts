@@ -5,14 +5,17 @@ from mockito import mock, when, verify, any, times
 from svn_look_wrappers import CommitDetails, RepositoryDetails
 from ordered_filename_pre_commit import check_filenames, MIGRATION_PATH, SKIP_KEYWORD
 from require_commit_message_pre_commit import check_commit_message
+from no_changes_in_tags_pre_commit import fail_on_tag_changes
 
 
 class SvnLookWrapperTestCase(unittest.TestCase):
-    
+
     def setUp(self):
         self.commit_details = mock(CommitDetails)
         self.added_files = []
         when(self.commit_details).get_added_files().thenReturn(self.added_files)
+        self.modified_files = []
+        when(self.commit_details).get_modified_files().thenReturn(self.modified_files)
         self.given_commit_message("")
 
         self.repository_details = mock(RepositoryDetails)
@@ -37,6 +40,29 @@ class SvnLookWrapperTestCase(unittest.TestCase):
 
     def given_file_added_in_commit(self, file_path):
         self.added_files.append(file_path)
+
+    def given_file_modified_in_commit(self, file_path):
+        self.modified_files.append(file_path)
+
+
+class NoChangesInTagsTest(SvnLookWrapperTestCase):
+
+    def test_does_not_fail_when_committing_to_trunk(self):
+        self.given_file_modified_in_commit("module/trunk/file.txt")
+        self.then_error_code_is(0)
+
+    def test_fails_when_committing_to_a_tag(self):
+        self.given_file_modified_in_commit("module/tags/tagname/file.txt")
+        self.then_error_code_is(1)
+
+    def test_prints_error_message_when_committing_to_tag(self):
+        self.given_file_modified_in_commit("module/tags/tagname/file.txt")
+        fail_on_tag_changes(self.commit_details)
+        verify(self.stderr).write("Error: Committing modified files to tags is not permitted!")
+
+    def then_error_code_is(self, error_code):
+        self.assertEqual(error_code,
+                         fail_on_tag_changes(self.commit_details))
 
 
 class RequireCommitMessageTest(SvnLookWrapperTestCase):
@@ -64,7 +90,7 @@ class RequireCommitMessageTest(SvnLookWrapperTestCase):
 
 
 class OrderedFilenameTest(SvnLookWrapperTestCase):
-    
+
     def test_does_not_fail_when_committing_first_file(self):
         self.given_file_added_in_commit("module/" + MIGRATION_PATH + "0.rb")
         self.number_of_errors_are(0)
@@ -116,7 +142,7 @@ class OrderedFilenameTest(SvnLookWrapperTestCase):
         self.given_file_added_in_commit("module/" + MIGRATION_PATH + "0.rb")
         self.given_file_added_in_commit("module/" + MIGRATION_PATH + "1.rb")
         self.number_of_errors_are(2)
-    
+
     def number_of_errors_are(self, number_of_errors):
         self.assertEquals(number_of_errors,
                           check_filenames(self.commit_details, self.repository_details))
