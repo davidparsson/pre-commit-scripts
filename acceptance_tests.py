@@ -23,7 +23,7 @@ def print_header(header):
 
 print_header("Testing require_commit_message_pre_commit")
 
-for i in revisions(1, 56):
+for i in revisions(20, 30):
     cd = CommitDetails(REPO, i, test_mode=True)
     result = check_commit_message(cd)
     print "Result: %d" % result
