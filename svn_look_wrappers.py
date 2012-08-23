@@ -44,7 +44,8 @@ class SvnLookWrapper(object):
         dev_null = open(os.devnull, "w")
         result = []
         try:
-            print look_command
+            if self._test_mode:
+                print "[debug]$ %s" % look_command
             result = subprocess.Popen(look_command.split(), stdout=subprocess.PIPE, stderr=dev_null).communicate()[0].split("\n")
             if result and result[-1] == "":
                 result.pop()
