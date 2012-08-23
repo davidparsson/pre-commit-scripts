@@ -4,25 +4,66 @@ import sys
 from mockito import mock, when, verify, any, times
 from svn_look_wrappers import CommitDetails, RepositoryDetails
 from ordered_filename_pre_commit import check_filenames, MIGRATION_PATH, SKIP_KEYWORD
+from require_commit_message_pre_commit import check_commit_message
 
-class OrderedFilenameTest(unittest.TestCase):
+
+class SvnLookWrapperTestCase(unittest.TestCase):
     
     def setUp(self):
         self.commit_details = mock(CommitDetails)
         self.added_files = []
         when(self.commit_details).get_added_files().thenReturn(self.added_files)
         self.given_commit_message("")
-        
+
         self.repository_details = mock(RepositoryDetails)
         when(self.repository_details).get_files_in(any()).thenReturn([])
         self.files_in_root = ["/"]
         when(self.repository_details).get_files_in(".").thenReturn(self.files_in_root)
-        
+
         self.original_stderr = sys.stderr
-        sys.stderr = mock()
-        
+        self.stderr = mock()
+        sys.stderr = self.stderr
+
     def tearDown(self):
         sys.stderr = self.original_stderr
+
+    def given_commit_message(self, message):
+        when(self.commit_details).get_commit_message().thenReturn(message)
+
+    def given_existing_files(self, module, path, *filenames):
+        self.files_in_root.append(module)
+        file_paths = [module + path + filename for filename in filenames]
+        when(self.repository_details).get_files_in(module + path).thenReturn(file_paths)
+
+    def given_file_added_in_commit(self, file_path):
+        self.added_files.append(file_path)
+
+
+class RequireCommitMessageTest(SvnLookWrapperTestCase):
+
+    def test_fails_when_commit_message_missing(self):
+        self.given_commit_message("")
+        self.then_error_code_is(1)
+
+    def test_fails_when_commit_message_too_short(self):
+        self.given_commit_message("..")
+        self.then_error_code_is(1)
+
+    def test_does_not_fail_when_commit_message_long_enough(self):
+        self.given_commit_message("...")
+        self.then_error_code_is(0)
+
+    def test_prints_error_message_when_message_to_short(self):
+        self.given_commit_message("..")
+        check_commit_message(self.commit_details)
+        verify(self.stderr).write("Error: Please enter a descriptive commit message!")
+
+    def then_error_code_is(self, number_of_errors):
+        self.assertEquals(number_of_errors,
+                          check_commit_message(self.commit_details))
+
+
+class OrderedFilenameTest(SvnLookWrapperTestCase):
     
     def test_does_not_fail_when_committing_first_file(self):
         self.given_file_added_in_commit("module/" + MIGRATION_PATH + "0.rb")
@@ -75,21 +116,11 @@ class OrderedFilenameTest(unittest.TestCase):
         self.given_file_added_in_commit("module/" + MIGRATION_PATH + "0.rb")
         self.given_file_added_in_commit("module/" + MIGRATION_PATH + "1.rb")
         self.number_of_errors_are(2)
-        
-    def given_commit_message(self, message):
-        when(self.commit_details).get_commit_message().thenReturn(message)
-
-    def given_existing_files(self, module, path, *filenames):
-        self.files_in_root.append(module)
-        file_paths = [module + path + filename for filename in filenames]
-        when(self.repository_details).get_files_in(module + path).thenReturn(file_paths)
-        
-    def given_file_added_in_commit(self, file_path):
-        self.added_files.append(file_path)
     
     def number_of_errors_are(self, number_of_errors):
         self.assertEquals(number_of_errors,
                           check_filenames(self.commit_details, self.repository_details))
+
 
 if __name__ == '__main__':
     unittest.main()
