@@ -4,11 +4,13 @@ import os
 from svn_look_wrappers import CommitDetails, RepositoryDetails
 from ordered_filename_pre_commit import check_filenames
 from require_commit_message_pre_commit import check_commit_message
+from no_changes_in_tags_pre_commit import fail_on_tag_changes
+
+
 REPO = "dummy-svn-server/repository"
 
 if not os.path.isdir(REPO):
     raise AssertionError("Test SVN repository required!")
-
 
 def revisions(first, last):
     for i in range(first, last + 1):
@@ -46,5 +48,13 @@ for i in revisions(40, 56):
     else:
         assert result == 0
 
+for i in revisions(50, 63):
+    cd = CommitDetails(REPO, i, test_mode=True)
+    result = fail_on_tag_changes(cd)
+    print "Result: %d" % result
+    if i in (60,):
+        assert result == 1
+    else:
+        assert result == 0
 
 print "Success!"
