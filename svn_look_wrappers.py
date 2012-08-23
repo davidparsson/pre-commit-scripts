@@ -58,7 +58,7 @@ class CommitDetails(SvnLookWrapper):
         return self._get_files_with_status("A")
 
     def get_modified_files(self):
-        return self._get_files_with_status("M")
+        return self._get_files_with_status("U")
 
     def get_commit_message(self):
         return "\n".join(self._svn_look("log"))
