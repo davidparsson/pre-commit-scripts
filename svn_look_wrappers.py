@@ -1,5 +1,6 @@
 import subprocess
 import os
+import optparse
 
 # Path to svnlook executable
 SVNLOOK_COMMAND = "svnlook"

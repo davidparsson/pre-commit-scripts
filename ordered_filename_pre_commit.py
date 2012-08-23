@@ -1,7 +1,6 @@
 #!/usr/bin/python
 import sys
 import re
-import optparse
 from svn_look_wrappers import get_option_parser, build_wrappers
 
 # Sub path to check. Final path will result in root_module/<MIGRATION_PATH>, 
