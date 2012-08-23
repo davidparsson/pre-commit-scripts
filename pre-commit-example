@@ -1,4 +1,4 @@
 #!/bin/bash
-/absolute/path/to/ordered_filename_pre_commit.py $1 $2
-/absolute/path/to/require_commit_message_pre_commit.py $1 $2
+/absolute/path/to/ordered_filename_pre_commit.py $1 $2 && \
+/absolute/path/to/require_commit_message_pre_commit.py $1 $2 && \
 /absolute/path/to/no_changes_in_tags_pre_commit.py $1 $2
