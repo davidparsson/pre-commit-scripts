@@ -16,7 +16,7 @@ def main():
     usage = """Usage: %prog REPOS TXN
 
 Runs pre-commit verification on a repository transaction, disallowing modification
-of files in tags."""
+of tagged files."""
     parser = get_option_parser(usage)
     try:
         commit_details, repository_details = build_wrappers(parser)
