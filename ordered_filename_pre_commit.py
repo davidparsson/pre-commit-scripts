@@ -2,7 +2,7 @@
 import sys
 import re
 import optparse
-from svn_look_wrappers import CommitDetails, RepositoryDetails
+from svn_look_wrappers import get_option_parser, build_wrappers
 
 # Sub path to check. Final path will result in root_module/<MIGRATION_PATH>, 
 # e.g. mymodule/trunk/db/migrations/
@@ -71,15 +71,9 @@ def main():
 
 Runs pre-commit verification on a repository transaction, verifying that
 matching files are added last, alphabetically."""
-    parser = optparse.OptionParser(usage=usage)
-    parser.add_option("-r", "--revision",
-                      help="Test mode. Specify a revision instead of a transaction.",
-                      action="store_true", default=False)
-
+    parser = get_option_parser(usage)
     try:
-        (options, (repos, transaction_or_revision)) = parser.parse_args()
-        commit_details = CommitDetails(repos, transaction_or_revision, test_mode=options.revision)
-        repository_details = RepositoryDetails(repos, transaction_or_revision, test_mode=options.revision)
+        commit_details, repository_details = build_wrappers(parser)
         return check_filenames(commit_details, repository_details)
     except:
         parser.print_help()

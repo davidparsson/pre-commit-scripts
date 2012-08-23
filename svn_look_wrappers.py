@@ -4,6 +4,19 @@ import os
 # Path to svnlook executable
 SVNLOOK_COMMAND = "svnlook"
 
+def get_option_parser(usage):
+    parser = optparse.OptionParser(usage=usage)
+    parser.add_option("-r", "--revision",
+                      help="Test mode. Specify a revision instead of a transaction.",
+                      action="store_true", default=False)
+    return parser
+
+def build_wrappers(option_parser):
+    (options, (repos, transaction_or_revision)) = option_parser.parse_args()
+    commit_details = CommitDetails(repos, transaction_or_revision, test_mode=options.revision)
+    repository_details = RepositoryDetails(repos, transaction_or_revision, test_mode=options.revision)
+    return commit_details, repository_details
+
 def command_output(cmd):
   "Captures a command's standard output."
   dev_null = open(os.devnull, "w")
