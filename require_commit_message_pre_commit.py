@@ -14,7 +14,7 @@ def main():
     usage = """Usage: %prog REPOS TXN
 
 Runs pre-commit verification on a repository transaction, verifying that
-matching files are added last, alphabetically."""
+the commit message is descriptive."""
     parser = get_option_parser(usage)
     try:
         commit_details, repository_details = build_wrappers(parser)
