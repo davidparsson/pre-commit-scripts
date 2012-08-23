@@ -56,4 +56,4 @@ module2/
 Assuming that the script is set up to match the `*.migration` files in the path `db/`
 for every module, it would **not** be possible to commit a file named
 `module1/db/05.migration` since a file named `06.migration` exists in module2.
-A correct filename would rather be module1/db/07.migration`.
+A correct filename would rather be `module1/db/07.migration`.
