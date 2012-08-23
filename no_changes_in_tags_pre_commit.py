@@ -8,7 +8,7 @@ TAGS_PATH_PATTERN = "^[^/]+/tags/"
 def fail_on_tag_changes(commit_details):
     for modified_file in commit_details.get_modified_files():
         if re.match(TAGS_PATH_PATTERN, modified_file):
-            sys.stderr.write("Error: Committing modified files to tags is not permitted!")
+            sys.stderr.write("Error: Modifying tagged files is not permitted!")
             return 1
     return 0
 

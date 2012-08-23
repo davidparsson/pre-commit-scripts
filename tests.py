@@ -58,7 +58,7 @@ class NoChangesInTagsTest(SvnLookWrapperTestCase):
     def test_prints_error_message_when_committing_to_tag(self):
         self.given_file_modified_in_commit("module/tags/tagname/file.txt")
         fail_on_tag_changes(self.commit_details)
-        verify(self.stderr).write("Error: Committing modified files to tags is not permitted!")
+        verify(self.stderr).write("Error: Modifying tagged files is not permitted!")
 
     def test_does_not_fail_when_committing_to_tags_folder_in_trunk(self):
         self.given_file_modified_in_commit("module/trunk/tags/file.txt")
