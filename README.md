@@ -4,6 +4,7 @@ Pre-Commit Hooks
 Contains the following pre-commit hooks:
 
 - Require commit messages of a certain length
+- Disallow modification of tagged files
 - Require new files in certain folders to be added last, alphabetically
 
 More details below.
@@ -26,6 +27,12 @@ Require Commit Message
 ----------------------
 
 Requires all commit message to be at least of a certain length. Default is 3 characters.
+
+
+Tagged Files Modification
+-------------------------
+
+Disallows commits with modifications to files in a path matching a tags regex.
 
 
 Ordered Filename Commit
