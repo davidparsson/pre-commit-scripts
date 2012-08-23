@@ -40,7 +40,8 @@ This check can be skipped by supplying a keyword in the commit message. Default 
 Ordered Filename Commit
 -----------------------
 
-A pre-commit script in python checking that certain files are added, alphabetically.
+A pre-commit script in python checking that certain files are added, modified or removed
+last in aplhabetical order.
 
 This is for example useful in projects where database migration scripts are
 executed alphabetically.
@@ -68,3 +69,6 @@ Assuming that the script is set up to match the `*.migration` files in the path 
 for every module, it would **not** be possible to commit a file named
 `module1/db/05.migration` since a file named `06.migration` exists in module2.
 A correct filename would rather be `module1/db/07.migration`.
+
+Neither would it be possible to modify or remove any migration but
+`module2/db/06.migration`.
