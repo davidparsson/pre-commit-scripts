@@ -43,7 +43,7 @@ for i in revisions(40, 56):
     print "Result: %d" % result
     if i in (45, 49,):
         assert result == 1
-    elif i in (51,):
+    elif i in (51, 52,): # 52 is a rename, without order change. Could be allowed
         assert result == 2
     else:
         assert result == 0
